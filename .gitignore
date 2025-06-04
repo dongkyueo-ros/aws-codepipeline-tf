@@ -3,7 +3,6 @@
 *.tfplan
 
 # Sensitive variable files
-*.tfvars
 *.tfvars.json
 
 # Terraform working dir
