@@ -4,7 +4,7 @@ environment         = "dev"
 
 # CodeCommit / CodePipeline Configuration
 source_repo_name    = "terraform-aws-dklee"
-source_repo_branch  = "develop"
+source_repo_branch  = "main"
 create_new_repo     = false
 
 # IAM Configuration

@@ -4,6 +4,16 @@ resource "aws_s3_bucket" "replication_bucket" {
   bucket_prefix = "${regex("[a-z0-9.-]+", lower(var.project_name))}-rpl"
 }
 
+# S3 bucket ACL access
+resource "aws_s3_bucket_ownership_controls" "replication_bucket_ownership" {
+  provider = aws.replication
+  bucket   = aws_s3_bucket.replication_bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "replication_bucket_access" {
   provider                = aws.replication
   bucket                  = aws_s3_bucket.replication_bucket.id
@@ -17,6 +27,11 @@ resource "aws_s3_bucket_acl" "replication_bucket_acl" {
   provider = aws.replication
   bucket   = aws_s3_bucket.replication_bucket.id
   acl      = "private"
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.replication_bucket_access,
+    aws_s3_bucket_ownership_controls.replication_bucket_ownership
+  ]
 }
 
 resource "aws_s3_bucket_versioning" "replication_bucket_versioning" {
@@ -54,6 +69,16 @@ resource "aws_s3_bucket" "codepipeline_bucket" {
   force_destroy = true
 }
 
+# S3 bucket ACL access
+resource "aws_s3_bucket_ownership_controls" "codepipeline_bucket_ownership" {
+  bucket = aws_s3_bucket.codepipeline_bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+
 resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_access" {
   bucket                  = aws_s3_bucket.codepipeline_bucket.id
   ignore_public_acls      = true
@@ -65,6 +90,11 @@ resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_access" {
 resource "aws_s3_bucket_acl" "codepipeline_bucket_acl" {
   bucket = aws_s3_bucket.codepipeline_bucket.id
   acl    = "private"
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.codepipeline_bucket_access,
+    aws_s3_bucket_ownership_controls.codepipeline_bucket_ownership
+  ]
 }
 
 resource "aws_s3_bucket_versioning" "codepipeline_bucket_versioning" {
@@ -73,7 +103,6 @@ resource "aws_s3_bucket_versioning" "codepipeline_bucket_versioning" {
     status = "Enabled"
   }
 }
-
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "codepipeline_bucket_encryption" {
   bucket = aws_s3_bucket.codepipeline_bucket.bucket
@@ -95,7 +124,10 @@ resource "aws_s3_bucket_logging" "codepipeline_bucket_logging" {
 resource "aws_s3_bucket_replication_configuration" "replication_config" {
   #provider = aws.replication
   # Must have bucket versioning enabled first
-  depends_on = [aws_s3_bucket_versioning.codepipeline_bucket_versioning]
+  depends_on = [
+    aws_s3_bucket_versioning.codepipeline_bucket_versioning
+    #aws_s3_bucket_public_access_block.codepipeline_bucket_access
+  ]
 
   role   = aws_iam_role.replication_s3_role.arn
   bucket = aws_s3_bucket.codepipeline_bucket.id
