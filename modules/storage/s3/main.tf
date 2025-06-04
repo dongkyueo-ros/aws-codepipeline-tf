@@ -125,8 +125,8 @@ resource "aws_s3_bucket_replication_configuration" "replication_config" {
   #provider = aws.replication
   # Must have bucket versioning enabled first
   depends_on = [
-    aws_s3_bucket_versioning.codepipeline_bucket_versioning
-    #aws_s3_bucket_public_access_block.codepipeline_bucket_access
+    aws_s3_bucket_versioning.codepipeline_bucket_versioning,
+    aws_s3_bucket_versioning.replication_bucket_versioning
   ]
 
   role   = aws_iam_role.replication_s3_role.arn
