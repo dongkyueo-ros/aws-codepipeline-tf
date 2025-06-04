@@ -3,7 +3,7 @@ project_name        = "cloocus-tf-project"
 environment         = "dev"
 
 # CodeCommit / CodePipeline Configuration
-source_repo_name    = "aws-codepipeline-tf"
+source_repo_name    = "terraform-repo-dklee"
 source_repo_branch  = "develop"
 create_new_repo     = false
 
